@@ -1,10 +1,7 @@
-// src/CategoryManagement.js
+import { React, useState } from 'react';
+import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
 
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-
-export default function CategoryManagement() {
+export default function CategoryManagement({ onAddCategory }) {
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
@@ -19,7 +16,11 @@ export default function CategoryManagement() {
       setCategories(updatedCategories);
       setEditingCategory(null);
     } else {
-      setCategories([...categories, { name: categoryName }]);
+      const newCategory = { name: categoryName };
+      setCategories([...categories, newCategory]);
+      if (onAddCategory) {
+        onAddCategory(newCategory); // Chamando a função de callback para notificar a adição da nova categoria
+      }
     }
 
     setCategoryName('');
@@ -56,6 +57,7 @@ export default function CategoryManagement() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#121212"/>
       <Text style={styles.title}>Gerenciamento de Categorias</Text>
       <TextInput
         style={styles.input}
@@ -122,5 +124,3 @@ const styles = StyleSheet.create({
     
   },
 });
-
-

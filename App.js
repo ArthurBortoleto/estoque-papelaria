@@ -1,11 +1,9 @@
-// App.js
-
-import React, { useState } from 'react';
+import { React, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import CategoryManagement from './src/screens/CategoryManagement';
 import ProductManagement from './src/screens/ProductManagement';
 
-const App = () => {
+export default function App(){
   const [categories, setCategories] = useState([]);
 
   const addCategory = (category) => {
@@ -16,13 +14,12 @@ const App = () => {
     <View style={styles.container}>
       <View style={styles.section}>
         <CategoryManagement categories={categories} onAddCategory={addCategory} />
-      </View>
-      <View style={styles.section}>
         <ProductManagement categories={categories} />
       </View>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -33,5 +30,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-export default App;

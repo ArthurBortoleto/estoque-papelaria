@@ -173,7 +173,7 @@ export default function Profile() {
           <Image
           key={photoUrl}
           style={style.profileImage}
-          source={photoUrl ? {uri: `http://192.168.15.10:3333/${photoUrl}`}:UserPhoto }
+          source={photoUrl ? {uri: `http://10.0.2.2:3333/${photoUrl}`}:UserPhoto }
           />
           <TouchableOpacity style={style.cameraButton} onPress={()=> pickImage()} >
             <MaterialIcons name="camera-alt" size={32} color="white" />

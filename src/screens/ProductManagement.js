@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { React, useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-export default function ProductManagement({ categories }){
+export default function ProductManagement({ categories }) {
   const [products, setProducts] = useState([]);
   const [productName, setProductName] = useState('');
   const [productQuantity, setProductQuantity] = useState('');
@@ -171,5 +171,3 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
 });
-
-
