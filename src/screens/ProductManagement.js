@@ -1,8 +1,10 @@
-import { React, useState } from 'react';
+import { React, useState,useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from "@react-navigation/native";
 
 export default function ProductManagement({ categories }) {
+  const navigation = useNavigation();
   const [products, setProducts] = useState([]);
   const [productName, setProductName] = useState('');
   const [productQuantity, setProductQuantity] = useState('');
@@ -62,6 +64,18 @@ export default function ProductManagement({ categories }) {
       ]
     );
   };
+  useEffect(()=>{
+    const fetchUserProfile = async () =>{
+      try {
+        const {data} = await api.get("/CategoryManagement");
+
+
+      }catch (error) {
+        console.log(error);
+      }
+    };
+    fetchUserProfile();
+  },[])
 
   const updateQuantity = (index, quantity) => {
     const updatedProducts = products.map((product, i) =>
@@ -90,8 +104,8 @@ export default function ProductManagement({ categories }) {
         selectedValue={selectedCategory}
         onValueChange={(itemValue) => setSelectedCategory(itemValue)}
         style={styles.picker}
-      >
-        <Picker.Item label="Selecione uma Categoria" value="" />
+      ><Text>MEXER NESSE MAP!!!!!</Text>
+       <Picker.Item label="Selecione uma Categoria" value="" />
         {categories.map((category, index) => (
           <Picker.Item key={index} label={category.name} value={category.name} />
         ))}

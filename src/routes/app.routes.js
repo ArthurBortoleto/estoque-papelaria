@@ -2,18 +2,22 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Profile from "../screens/Profile";
+import ProductManagement from "../screens/ProductManagement";
+import CategoryManagement from "../screens/CategoryManagement";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+
 
 const Tab = createBottomTabNavigator();
 
 export default function AppRoutes() {
   return (
-    <Tab.Navigator
+    <Tab.Navigator 
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarActiveTintColor: "#DC1637",
-        tabBarInactiveTintColor: "#AEAEB3",
+        tabBarActiveTintColor: "#4169e1",
+        tabBarInactiveTintColor: "#556190",
+        tabBarStyle:{backgroundColor:"#000035"}
       }}
     >
       <Tab.Screen
@@ -31,10 +35,10 @@ export default function AppRoutes() {
         }}
       />
       <Tab.Screen
-        name="cars"
-        component={Home}
+        name="category"
+        component={CategoryManagement}
         options={{
-          title: "cars",
+          title: "category",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
               name="car-outline"
@@ -45,10 +49,10 @@ export default function AppRoutes() {
         }}
       />
       <Tab.Screen
-        name="calendar"
-        component={Home}
+        name="product"
+        component={ProductManagement}
         options={{
-          title: "cars",
+          title: "product",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
               name="calendar-outline"

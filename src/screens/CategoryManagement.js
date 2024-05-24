@@ -1,7 +1,9 @@
 import { React, useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
 
 export default function CategoryManagement({ onAddCategory }) {
+  const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);

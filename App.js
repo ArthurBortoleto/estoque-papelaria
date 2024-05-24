@@ -1,7 +1,8 @@
 import { React, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import CategoryManagement from './src/screens/CategoryManagement';
-import ProductManagement from './src/screens/ProductManagement';
+import Routes from './src/routes';
+import { NavigationContainer } from "@react-navigation/native";
+import AppProvider from "./src/context";
 
 export default function App(){
   const [categories, setCategories] = useState([]);
@@ -12,10 +13,11 @@ export default function App(){
 
   return (
     <View style={styles.container}>
-      <View style={styles.section}>
-        <CategoryManagement categories={categories} onAddCategory={addCategory} />
-        <ProductManagement categories={categories} />
-      </View>
+        <NavigationContainer>
+            <AppProvider>
+                <Routes/>
+            </AppProvider>
+        </NavigationContainer>
     </View>
   );
 };
