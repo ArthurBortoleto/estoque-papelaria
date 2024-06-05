@@ -17,7 +17,7 @@ export default function AppRoutes() {
         tabBarShowLabel: false,
         tabBarActiveTintColor: "#4169e1",
         tabBarInactiveTintColor: "#556190",
-        tabBarStyle:{backgroundColor:"#000035"}
+        tabBarStyle:{backgroundColor:"#ffff"}
       }}
     >
       <Tab.Screen

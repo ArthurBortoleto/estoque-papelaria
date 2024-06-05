@@ -120,7 +120,7 @@ const style = StyleSheet.create({
     borderColor: "#8a8787",
     borderRadius: 4,
     width: "100%",
-    backgroundColor:"#b0c4de"
+    backgroundColor:"#ffff"
   },
 
 

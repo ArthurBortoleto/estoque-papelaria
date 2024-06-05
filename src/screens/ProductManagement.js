@@ -1,14 +1,16 @@
-import { React, useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from "@react-navigation/native";
+import axios from 'axios'; // Adicione a importação do axios
 
-export default function ProductManagement({ categories }) {
+export default function ProductManagement() {
   const navigation = useNavigation();
   const [products, setProducts] = useState([]);
   const [productName, setProductName] = useState('');
   const [productQuantity, setProductQuantity] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
 
   const addProduct = () => {
@@ -64,18 +66,18 @@ export default function ProductManagement({ categories }) {
       ]
     );
   };
-  useEffect(()=>{
-    const fetchUserProfile = async () =>{
+
+  useEffect(() => {
+    const fetchCategories = async () => {
       try {
-        const {data} = await api.get("/CategoryManagement");
-
-
-      }catch (error) {
+        const response = await axios.get('/CategoryManagement'); // Substitua pelo endpoint correto
+        setCategories(response.data);
+      } catch (error) {
         console.log(error);
       }
     };
-    fetchUserProfile();
-  },[])
+    fetchCategories();
+  }, []);
 
   const updateQuantity = (index, quantity) => {
     const updatedProducts = products.map((product, i) =>
@@ -104,8 +106,8 @@ export default function ProductManagement({ categories }) {
         selectedValue={selectedCategory}
         onValueChange={(itemValue) => setSelectedCategory(itemValue)}
         style={styles.picker}
-      ><Text>MEXER NESSE MAP!!!!!</Text>
-       <Picker.Item label="Selecione uma Categoria" value="" />
+      >
+        <Picker.Item label="Selecione uma Categoria" value="" />
         {categories.map((category, index) => (
           <Picker.Item key={index} label={category.name} value={category.name} />
         ))}
@@ -151,6 +153,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: '#fff',
   },
   input: {
     height: 40,
@@ -158,10 +161,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 8,
+    backgroundColor: '#fff',
   },
   picker: {
     height: 50,
     marginBottom: 16,
+    backgroundColor: '#fff',
   },
   productItem: {
     flexDirection: 'row',
@@ -170,6 +175,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    backgroundColor: '#fff',
   },
   productName: {
     fontSize: 18,
@@ -183,5 +189,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 8,
     paddingHorizontal: 8,
+    backgroundColor: '#fff',
   },
 });
