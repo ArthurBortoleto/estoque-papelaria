@@ -1,65 +1,90 @@
-import { React, useState } from 'react';
+import { React, useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 
-export default function CategoryManagement({ onAddCategory }) {
+import { api } from '../services/api'
+
+export default function CategoryManagement() {
+
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
+  const [error, setError] = useState("");
 
-  const addCategory = () => {
-    if (!categoryName.trim()) return;
 
-    if (editingCategory !== null) {
-      const updatedCategories = categories.map((category, index) =>
-        index === editingCategory ? { ...category, name: categoryName } : category
-      );
-      setCategories(updatedCategories);
-      setEditingCategory(null);
-    } else {
-      const newCategory = { name: categoryName };
-      setCategories([...categories, newCategory]);
-      if (onAddCategory) {
-        onAddCategory(newCategory); // Chamando a função de callback para notificar a adição da nova categoria
-      }
+  async function handleSubmit() {
+    setError("");
+    if (!categoryName.trim()) {
+      setError("Por favor, preencha todos os campos!");
+      return;
     }
+    try {
+       await api.post("categories", {
+        name: categoryName,
+      });
+      Alert.alert("Sucesso", "categoria feita com sucesso!");
+    } catch (error) {
+      if (error.response) {
+        setError(error.response.data.message);
+      }
+      console.log(error)
+      setError("Não foi possivel se conectar com o servidor");
+    }
+  }
 
-    setCategoryName('');
-  };
+  async function handleSubmitEdit(){
+    setError("");
+    if(!categoryName.trim()) {
+      setError("Prencha todos os campos");
+      return;
+    }
+    try{
+      await api.patch("profile",{
+        name: categoryName,
+      })
+      Alert.alert("Sucesso", "Usuário atualizado com sucesso")
+      setEditingCategory(false)
+    }catch(error){
+      if (error.response){
+      setError(error.response.data.message);
+    } else {
+      setError("Não foi possivel se comunicar com o servidor. ");
+    }
+  }}
 
-  const editCategory = (index) => {
-    setCategoryName(categories[index].name);
-    setEditingCategory(index);
-  };
+  // const editCategory = (index) => {
+  //   setCategoryName(categories[index].name);
+  //   setEditingCategory(index);
+  // };
 
-  const deleteCategory = (index) => {
-    Alert.alert(
-      "Confirmar Exclusão",
-      "Você tem certeza que deseja excluir esta categoria?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: () => {
-            const updatedCategories = categories.filter((_, i) => i !== index);
-            setCategories(updatedCategories);
-            if (editingCategory === index) {
-              setCategoryName('');
-              setEditingCategory(null);
-            }
-          }
-        }
-      ]
-    );
-  };
+  // const deleteCategory = (index) => {
+  //   Alert.alert(
+  //     "Confirmar Exclusão",
+  //     "Você tem certeza que deseja excluir esta categoria?",
+  //     [
+  //       {
+  //         text: "Cancelar",
+  //         style: "cancel"
+  //       },
+  //       {
+  //         text: "OK",
+  //         onPress: () => {
+  //           const updatedCategories = categories.filter((_, i) => i !== index);
+  //           setCategories(updatedCategories);
+  //           if (editingCategory === index) {
+  //             setCategoryName('');
+  //             setEditingCategory(null);
+  //           }
+  //         }
+  //       }
+  //     ]
+  //   );
+  // };
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#121212"/>
+      <StatusBar barStyle="light-content" backgroundColor="#121212" />
       <Text style={styles.title}>Gerenciamento de Categorias</Text>
       <TextInput
         style={styles.input}
@@ -67,10 +92,20 @@ export default function CategoryManagement({ onAddCategory }) {
         value={categoryName}
         onChangeText={setCategoryName}
       />
+
       <Button
-        title={editingCategory !== null ? "Editar Categoria" : "Adicionar Categoria"}
-        onPress={addCategory}
+        title="Adicionar Categoria"
+        onPress={() => handleSubmit()}
       />
+            <Button
+        title="Editar Categoria"
+        onPress={() => handleSubmitEdit()}
+      /> 
+      {/* <TouchableOpacity onPress={() => handleSubmit()}>
+        <Text>Clique</Text>
+      </TouchableOpacity> */}
+      {error && <Text >{error}</Text>}
+
       <FlatList
         data={categories}
         keyExtractor={(item, index) => index.toString()}
@@ -106,7 +141,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 8,
-    
+
   },
   categoryItem: {
     flexDirection: 'row',
@@ -115,14 +150,20 @@ const styles = StyleSheet.create({
     padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    
+
   },
   categoryName: {
     fontSize: 18,
   },
   buttonsContainer: {
     flexDirection: 'row',
-    gap:10,
-    
+    gap: 10,
+
+  },
+  erro: {
+    color: "#ffff",
+    fontWeight: "400",
+    textAlign: "center",
+    marginVertical: 16,
   },
 });

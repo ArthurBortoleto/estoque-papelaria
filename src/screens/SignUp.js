@@ -120,7 +120,7 @@ const style = StyleSheet.create({
     borderColor: "#556190",
     borderRadius: 4,
     width: "100%",
-    backgroundColor:"#b0c4de"
+    backgroundColor:"#ffff"
   },
   input: {
     flex: 1,
@@ -128,7 +128,7 @@ const style = StyleSheet.create({
     color:"#000"
   },
   erro: {
-    color: "#000",
+    color: "#ffff",
     fontWeight: "400",
     textAlign: "center",
     marginVertical: 16,

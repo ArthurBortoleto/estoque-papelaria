@@ -45,10 +45,7 @@ export default function SignIn() {
         <Feather name="chevron-left" size={32} color="#474A51" />
       </TouchableOpacity>
       <View>
-        <Text style={style.title}>Estamos quase lá.</Text>
-        <Text style={style.subtitle}>
-          Faça seu login para começar a utilizar o app.
-        </Text>
+        <Text style={style.title}>Login</Text>
       </View>
       <View style={{ gap: 16 }}>
         <View style={style.inputBox}>
@@ -73,7 +70,7 @@ export default function SignIn() {
             onChangeText={(text) => setPassword(text)}
           />
         </View>
-        {error && <Text>{error}</Text>}
+        {error && <Text style={{color:"#ffff"}}>{error}</Text>}
         <MyButton
           onPress={handleSubmit}
           text="Login"
@@ -98,18 +95,10 @@ const style = StyleSheet.create({
   title: {
     fontSize: 54,
     fontWeight: "700",
-    width: 240,
+    width: "100%",
     color: "#3D3D4D",
+    textAlign:"center",
   },
-
-
-  subtitle: {
-    fontSize: 20,
-    fontWeight: "300",
-    width: 280,
-    marginTop: 16,
-  },
-
 
   inputBox: {
     flexDirection: "row",

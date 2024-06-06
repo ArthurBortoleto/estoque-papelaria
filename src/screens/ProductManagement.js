@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from "@react-navigation/native";
-import axios from 'axios'; // Adicione a importação do axios
+import { useAuth } from "../context/useAuth";
+import { api } from '../services/api'
 
 export default function ProductManagement() {
   const navigation = useNavigation();
@@ -70,7 +71,7 @@ export default function ProductManagement() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('/CategoryManagement'); // Substitua pelo endpoint correto
+        const response = await api.get('categories');
         setCategories(response.data);
       } catch (error) {
         console.log(error);
