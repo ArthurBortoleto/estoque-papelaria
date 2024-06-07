@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../context/useAuth";
-import { api } from '../services/api'
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { api } from '../services/api';
 
 export default function ProductManagement() {
   const navigation = useNavigation();
@@ -14,7 +13,36 @@ export default function ProductManagement() {
   const [categories, setCategories] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  const addProduct = () => {
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('products');
+      setProducts(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('categories');
+      setCategories(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchCategories();
+    }, [])
+  );
+
+  async function addProduct() {
     if (!productName.trim() || !selectedCategory) return;
 
     const quantity = parseInt(productQuantity, 10);
@@ -32,17 +60,17 @@ export default function ProductManagement() {
     setProductName('');
     setProductQuantity('');
     setSelectedCategory('');
-  };
+  }
 
-  const editProduct = (index) => {
+  function editProduct(index) {
     const product = products[index];
     setProductName(product.name);
     setProductQuantity(product.quantity.toString());
     setSelectedCategory(product.category);
     setEditingProduct(index);
-  };
+  }
 
-  const deleteProduct = (index) => {
+  async function deleteProduct(index) {
     Alert.alert(
       "Confirmar Exclusão",
       "Você tem certeza que deseja excluir este produto?",
@@ -53,39 +81,27 @@ export default function ProductManagement() {
         },
         {
           text: "OK",
-          onPress: () => {
-            const updatedProducts = products.filter((_, i) => i !== index);
-            setProducts(updatedProducts);
-            if (editingProduct === index) {
-              setProductName('');
-              setProductQuantity('');
-              setSelectedCategory('');
-              setEditingProduct(null);
+          onPress: async () => {
+            try {
+              await api.delete(`products/${index}`);
+              fetchProducts();
+              Alert.alert("Sucesso", "Produto excluído com sucesso!");
+            } catch (error) {
+              console.log(error);
+              Alert.alert("Erro", "Não foi possível excluir o produto.");
             }
           }
         }
       ]
     );
-  };
+  }
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await api.get('categories');
-        setCategories(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  const updateQuantity = (index, quantity) => {
+  function updateQuantity(index, quantity) {
     const updatedProducts = products.map((product, i) =>
       i === index ? { ...product, quantity } : product
     );
     setProducts(updatedProducts);
-  };
+  }
 
   return (
     <View style={styles.container}>
@@ -142,7 +158,7 @@ export default function ProductManagement() {
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

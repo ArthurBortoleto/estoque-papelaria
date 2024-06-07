@@ -1,10 +1,11 @@
-import { React, useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, StatusBar, Alert } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
+import { useAuth } from '../context/useAuth';
 import { api } from '../services/api';
 
-export default function CategoryManagement() {
-
+export default function CategoryManagement({ updateCategories }) {
+  const { user, signOut } = useAuth();
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState('');
@@ -12,38 +13,49 @@ export default function CategoryManagement() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const response = await api.get('categories');
-        setCategories(response.data);
-      } catch (error) {
-        console.log(error);
-        setError("Não foi possível carregar as categorias.");
-      }
-    }
     fetchCategories();
   }, []);
 
-  async function handleSubmit() {
-    setError("");
-    if (!categoryName.trim()) {
-      setError("Por favor, preencha todos os campos!");
-      return;
-    }
+  async function fetchCategories() {
     try {
-      await api.post("categories", {
-        name: categoryName,
-      });
-      Alert.alert("Sucesso", "Categoria criada com sucesso!");
-      setCategoryName('');
-      fetchCategories();
+      const response = await api.get('categories');
+      setCategories(response.data);
     } catch (error) {
-      if (error.response) {
-        setError(error.response.data.message);
-      }
       console.log(error);
-      setError("Não foi possível se conectar com o servidor.");
+      setError("Não foi possível carregar as categorias.");
     }
+  }
+
+  async function deleteCategory(id) {
+    Alert.alert(
+      "Confirmar Exclusão",
+      "Você tem certeza que deseja excluir esta categoria?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: async () => {
+            try {
+              await api.delete(`categories/${id}`);
+              fetchCategories();
+              Alert.alert("Sucesso", "Categoria excluída com sucesso!");
+              updateCategories(); // Chama a função de atualização de categorias em ProductManagement
+            } catch (error) {
+              console.log(error);
+              setError();
+            }
+          }
+        }
+      ]
+    );
+  }
+
+  function editCategory(id, name) {
+    setCategoryName(name);
+    setEditingCategory(id);
   }
 
   async function handleSubmitEdit() {
@@ -69,44 +81,26 @@ export default function CategoryManagement() {
     }
   }
 
-  async function deleteCategory(id) {
-    Alert.alert(
-      "Confirmar Exclusão",
-      "Você tem certeza que deseja excluir esta categoria?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: async () => {
-            try {
-              await api.delete(`categories/${id}`);
-              fetchCategories();
-              Alert.alert("Sucesso", "Categoria excluída com sucesso!");
-            } catch (error) {
-              console.log(error);
-              setError("Não foi possível excluir a categoria.");
-            }
-          }
-        }
-      ]
-    );
-  }
-
-  function editCategory(id, name) {
-    setCategoryName(name);
-    setEditingCategory(id);
-  }
-
-  async function fetchCategories() {
+  async function handleSubmit() {
+    setError("");
+    if (!categoryName.trim()) {
+      setError("Por favor, preencha todos os campos!");
+      return;
+    }
     try {
-      const response = await api.get('categories');
-      setCategories(response.data);
+      await api.post("categories", {
+        name: categoryName,
+      });
+      Alert.alert("Sucesso", "Categoria criada com sucesso!");
+      setCategoryName('');
+      fetchCategories();
+      updateCategories(); // Chama a função de atualização de categorias em ProductManagement
     } catch (error) {
+      if (error.response) {
+        setError(error.response.data.message);
+      }
       console.log(error);
-      setError("Não foi possível carregar as categorias.");
+      setError();
     }
   }
 
@@ -124,7 +118,7 @@ export default function CategoryManagement() {
         title={editingCategory ? "Editar Categoria" : "Adicionar Categoria"}
         onPress={editingCategory ? handleSubmitEdit : handleSubmit}
       />
-      {error && <Text style={styles.erro}>{error}</Text>}
+      {error && <Text style={styles.error}>{error}</Text>}
       <FlatList
         data={categories}
         keyExtractor={(item) => item.id.toString()}
@@ -152,6 +146,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: '#fff',
   },
   input: {
     height: 40,
@@ -159,6 +154,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 8,
+    backgroundColor: '#fff',
   },
   categoryItem: {
     flexDirection: 'row',
@@ -167,6 +163,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    backgroundColor: '#fff',
   },
   categoryName: {
     fontSize: 18,
@@ -175,7 +172,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
-  erro: {
+  error: {
     color: "#fff",
     fontWeight: "400",
     textAlign: "center",
