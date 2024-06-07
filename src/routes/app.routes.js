@@ -20,12 +20,12 @@ export function HomeStack() {
     >
       <Stack.Screen
         name="Home"
-        component={Home}
+        component={CategoryManagement}
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="home-outline"
+            <MaterialIcons
+              name="category"
               size={40}
               color={color}
             />
@@ -56,20 +56,6 @@ export default function AppRoutes() {
         options={{
           title: "HomeStack",
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="home-outline"
-              size={40}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="category"
-        component={CategoryManagement}
-        options={{
-          title: "category",
-          tabBarIcon: ({ color }) => (
             <MaterialIcons
               name="category"
               size={40}
@@ -78,6 +64,7 @@ export default function AppRoutes() {
           ),
         }}
       />
+      
       <Tab.Screen
         name="product"
         component={ProductManagement}
