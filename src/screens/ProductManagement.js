@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { FontAwesome5, AntDesign } from '@expo/vector-icons';
 import { api } from '../services/api';
 
 export default function ProductManagement() {
@@ -134,6 +135,7 @@ export default function ProductManagement() {
         placeholder="Nome do Produto"
         value={productName}
         onChangeText={setProductName}
+        placeholderTextColor="#6c757d"
       />
       <TextInput
         style={styles.input}
@@ -141,6 +143,7 @@ export default function ProductManagement() {
         value={productQuantity}
         keyboardType="numeric"
         onChangeText={setProductQuantity}
+        placeholderTextColor="#6c757d"
       />
       <Picker
         selectedValue={selectedCategory}
@@ -155,6 +158,7 @@ export default function ProductManagement() {
       <Button
         title={editingProduct !== null ? "Editar Produto" : "Adicionar Produto"}
         onPress={addProduct}
+        color="#00aaff"
       />
       <FlatList
         data={products}
@@ -167,13 +171,16 @@ export default function ProductManagement() {
               <Text>Quantidade: {item.quantity}</Text>
             </View>
             <View style={styles.buttonsContainer}>
-              <Button title="Editar" onPress={() => editProduct(index)} />
-              <Button title="Excluir" onPress={() => deleteProduct(index)} />
+              <View style={{flexDirection: 'row',gap:20,}}>
+              <FontAwesome5 name="pen-fancy" onPress={() => editProduct(index)} size={24} color="#00aaff" />
+              <AntDesign name="delete" onPress={() => deleteProduct(index)} size={24} color="#dc3545" />
+              </View>
               <TextInput
                 style={styles.quantityInput}
                 placeholder="Atualizar Quantidade"
                 keyboardType="numeric"
                 onChangeText={(text) => updateQuantity(index, parseInt(text, 10))}
+                placeholderTextColor="#6c757d"
               />
             </View>
           </View>
@@ -193,20 +200,24 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#fff',
+    color: '#ffff',
+    textAlign: 'center',
   },
   input: {
     height: 40,
-    borderColor: '#ccc',
+    borderColor: '#ced4da',
     borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 8,
-    backgroundColor: '#fff',
+    backgroundColor: '#e9ecef',
+    borderRadius: 4,
+    color: '#495057',
   },
   picker: {
     height: 50,
     marginBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#e9ecef',
+    borderRadius: 4,
   },
   productItem: {
     flexDirection: 'row',
@@ -214,21 +225,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    backgroundColor: '#fff',
+    borderBottomColor: '#dee2e6',
+    backgroundColor: '#ffffff',
+    borderRadius: 4,
+    marginBottom: 8,
   },
   productName: {
     fontSize: 18,
+    color: '#495057',
   },
   buttonsContainer: {
     flexDirection: 'column',
+    alignItems: 'center',
+    gap: 10,
   },
   quantityInput: {
     height: 40,
-    borderColor: '#ccc',
+    borderColor: '#ced4da',
     borderWidth: 1,
     marginTop: 8,
     paddingHorizontal: 8,
-    backgroundColor: '#fff',
+    backgroundColor: '#e9ecef',
+    borderRadius: 4,
+    color: '#495057',
   },
 });

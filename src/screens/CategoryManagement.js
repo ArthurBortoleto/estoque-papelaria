@@ -1,35 +1,97 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, StatusBar, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from '../context/useAuth';
+import { FontAwesome5, AntDesign } from '@expo/vector-icons';
 import { api } from '../services/api';
 
-export default function CategoryManagement({ updateCategories }) {
-  const { user, signOut } = useAuth();
+export default function ProductManagement() {
   const navigation = useNavigation();
+  const [products, setProducts] = useState([]);
+  const [productName, setProductName] = useState('');
+  const [productQuantity, setProductQuantity] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState([]);
-  const [categoryName, setCategoryName] = useState('');
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [error, setError] = useState("");
+  const [editingProduct, setEditingProduct] = useState(null);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('products');
+      const fetchedProducts = response.data.map(product => ({
+        id: product.id,
+        name: product.name || '',
+        quantity: product.quantity !== undefined ? product.quantity : 0,
+        category: product.category || ''
+      }));
+      setProducts(fetchedProducts);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  async function fetchCategories() {
+  const fetchCategories = async () => {
     try {
       const response = await api.get('categories');
       setCategories(response.data);
     } catch (error) {
       console.log(error);
-      setError("Não foi possível carregar as categorias.");
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
+
+  async function addProduct() {
+    if (!productName.trim() || !selectedCategory) return;
+
+    const quantity = parseInt(productQuantity, 10);
+
+    try {
+      if (editingProduct !== null) {
+        const productId = products[editingProduct].id;
+        await api.patch(`products/${productId}`, {
+          name: productName,
+          quantity,
+          category: selectedCategory
+        });
+        Alert.alert("Sucesso", "Produto editado com sucesso!");
+      } else {
+        await api.post('products', {
+          name: productName,
+          quantity,
+          category: selectedCategory
+        });
+        Alert.alert("Sucesso", "Produto adicionado com sucesso!");
+      }
+
+      setProductName('');
+      setProductQuantity('');
+      setSelectedCategory('');
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Não foi possível adicionar/editar o produto.");
     }
   }
 
-  async function deleteCategory(id) {
+  function editProduct(index) {
+    const product = products[index];
+    if (product) {
+      setProductName(product.name || '');
+      setProductQuantity(product.quantity !== undefined ? product.quantity.toString() : '');
+      setSelectedCategory(product.category || '');
+      setEditingProduct(index);
+    }
+  }
+
+  async function deleteProduct(index) {
+    const productId = products[index].id;
     Alert.alert(
       "Confirmar Exclusão",
-      "Você tem certeza que deseja excluir esta categoria?",
+      "Você tem certeza que deseja excluir este produto?",
       [
         {
           text: "Cancelar",
@@ -39,13 +101,12 @@ export default function CategoryManagement({ updateCategories }) {
           text: "OK",
           onPress: async () => {
             try {
-              await api.delete(`categories/${id}`);
-              fetchCategories();
-              Alert.alert("Sucesso", "Categoria excluída com sucesso!");
-              updateCategories(); // Chama a função de atualização de categorias em ProductManagement
+              await api.delete(`products/${productId}`);
+              fetchProducts();
+              Alert.alert("Sucesso", "Produto excluído com sucesso!");
             } catch (error) {
               console.log(error);
-              setError();
+              Alert.alert("Erro", "Não foi possível excluir o produto.");
             }
           }
         }
@@ -53,81 +114,53 @@ export default function CategoryManagement({ updateCategories }) {
     );
   }
 
-  function editCategory(id, name) {
-    setCategoryName(name);
-    setEditingCategory(id);
-  }
-
-  async function handleSubmitEdit() {
-    setError("");
-    if (!categoryName.trim()) {
-      setError("Preencha todos os campos.");
-      return;
-    }
-    try {
-      await api.patch(`categories/${editingCategory}`, {
-        name: categoryName,
-      });
-      Alert.alert("Sucesso", "Categoria atualizada com sucesso!");
-      setCategoryName('');
-      setEditingCategory(null);
-      fetchCategories();
-    } catch (error) {
-      if (error.response) {
-        setError(error.response.data.message);
-      } else {
-        setError("Não foi possível se comunicar com o servidor.");
-      }
-    }
-  }
-
-  async function handleSubmit() {
-    setError("");
-    if (!categoryName.trim()) {
-      setError("Por favor, preencha todos os campos!");
-      return;
-    }
-    try {
-      await api.post("categories", {
-        name: categoryName,
-      });
-      Alert.alert("Sucesso", "Categoria criada com sucesso!");
-      setCategoryName('');
-      fetchCategories();
-      updateCategories(); // Chama a função de atualização de categorias em ProductManagement
-    } catch (error) {
-      if (error.response) {
-        setError(error.response.data.message);
-      }
-      console.log(error);
-      setError();
-    }
-  }
-
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#121212" />
-      <Text style={styles.title}>Gerenciamento de Categorias</Text>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
+      <Text style={styles.title}>Gerenciamento de Produtos</Text>
       <TextInput
         style={styles.input}
-        placeholder="Nome da Categoria"
-        value={categoryName}
-        onChangeText={setCategoryName}
+        placeholder="Nome do Produto"
+        value={productName}
+        onChangeText={setProductName}
+        placeholderTextColor="#6c757d"
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Quantidade"
+        value={productQuantity}
+        keyboardType="numeric"
+        onChangeText={setProductQuantity}
+        placeholderTextColor="#6c757d"
+      />
+      <Picker
+        selectedValue={selectedCategory}
+        onValueChange={(itemValue) => setSelectedCategory(itemValue)}
+        style={styles.picker}
+      >
+        <Picker.Item label="Selecione uma Categoria" value="" />
+        {categories.map((category, index) => (
+          <Picker.Item key={index} label={category.name} value={category.name} />
+        ))}
+      </Picker>
       <Button
-        title={editingCategory ? "Editar Categoria" : "Adicionar Categoria"}
-        onPress={editingCategory ? handleSubmitEdit : handleSubmit}
+        title={editingProduct !== null ? "Editar Produto" : "Adicionar Produto"}
+        onPress={addProduct}
+        color="#00aaff"
       />
-      {error && <Text style={styles.error}>{error}</Text>}
       <FlatList
-        data={categories}
+        data={products}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.categoryItem}>
-            <Text style={styles.categoryName}>{item.name}</Text>
+        renderItem={({ item, index }) => (
+          <View style={styles.productItem}>
+            <View>
+              <Text style={styles.productName}>{item.name}</Text>
+              <Text>Categoria: {item.category}</Text>
+              <Text>Quantidade: {item.quantity}</Text>
+            </View>
             <View style={styles.buttonsContainer}>
-              <Button title="Editar" onPress={() => editCategory(item.id, item.name)} />
-              <Button title="Excluir" onPress={() => deleteCategory(item.id)} />
+              <FontAwesome5 name="pen-fancy" onPress={() => editProduct(index)} size={24} color="#00aaff" />
+              <AntDesign name="delete" onPress={() => deleteProduct(index)} size={24} color="#dc3545" />
             </View>
           </View>
         )}
@@ -146,36 +179,43 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#fff',
+    color: '#ffff',
+    textAlign: 'center',
   },
   input: {
     height: 40,
-    borderColor: '#ccc',
+    borderColor: '#ced4da',
     borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 8,
-    backgroundColor: '#fff',
+    backgroundColor: '#e9ecef',
+    borderRadius: 4,
+    color: '#495057',
   },
-  categoryItem: {
+  picker: {
+    height: 50,
+    marginBottom: 16,
+    backgroundColor: '#e9ecef',
+    borderRadius: 4,
+  },
+  productItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    backgroundColor: '#fff',
+    borderBottomColor: '#dee2e6',
+    backgroundColor: '#ffffff',
+    borderRadius: 4,
+    marginBottom: 8,
   },
-  categoryName: {
+  productName: {
     fontSize: 18,
+    color: '#495057',
   },
   buttonsContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
-  },
-  error: {
-    color: "#fff",
-    fontWeight: "400",
-    textAlign: "center",
-    marginVertical: 16,
   },
 });
