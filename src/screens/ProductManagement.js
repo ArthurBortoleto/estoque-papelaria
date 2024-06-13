@@ -16,7 +16,13 @@ export default function ProductManagement() {
   const fetchProducts = async () => {
     try {
       const response = await api.get('products');
-      setProducts(response.data);
+      const fetchedProducts = response.data.map(product => ({
+        id: product.id,
+        name: product.name || '',
+        quantity: product.quantity !== undefined ? product.quantity : 0,
+        category: product.category || ''
+      }));
+      setProducts(fetchedProducts);
     } catch (error) {
       console.log(error);
     }
@@ -47,30 +53,47 @@ export default function ProductManagement() {
 
     const quantity = parseInt(productQuantity, 10);
 
-    if (editingProduct !== null) {
-      const updatedProducts = products.map((product, index) =>
-        index === editingProduct ? { ...product, name: productName, quantity, category: selectedCategory } : product
-      );
-      setProducts(updatedProducts);
-      setEditingProduct(null);
-    } else {
-      setProducts([...products, { name: productName, quantity, category: selectedCategory }]);
-    }
+    try {
+      if (editingProduct !== null) {
+        const productId = products[editingProduct].id;
+        await api.patch(`products/${productId}`, {
+          name: productName,
+          quantity,
+          category: selectedCategory
+        });
+        Alert.alert("Sucesso", "Produto editado com sucesso!");
+      } else {
+        await api.post('products', {
+          name: productName,
+          quantity,
+          category: selectedCategory
+        });
+        Alert.alert("Sucesso", "Produto adicionado com sucesso!");
+      }
 
-    setProductName('');
-    setProductQuantity('');
-    setSelectedCategory('');
+      setProductName('');
+      setProductQuantity('');
+      setSelectedCategory('');
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Não foi possível adicionar/editar o produto.");
+    }
   }
 
   function editProduct(index) {
     const product = products[index];
-    setProductName(product.name);
-    setProductQuantity(product.quantity.toString());
-    setSelectedCategory(product.category);
-    setEditingProduct(index);
+    if (product) {
+      setProductName(product.name || '');
+      setProductQuantity(product.quantity !== undefined ? product.quantity.toString() : '');
+      setSelectedCategory(product.category || '');
+      setEditingProduct(index);
+    }
   }
 
   async function deleteProduct(index) {
+    const productId = products[index].id;
     Alert.alert(
       "Confirmar Exclusão",
       "Você tem certeza que deseja excluir este produto?",
@@ -83,7 +106,7 @@ export default function ProductManagement() {
           text: "OK",
           onPress: async () => {
             try {
-              await api.delete(`products/${index}`);
+              await api.delete(`products/${productId}`);
               fetchProducts();
               Alert.alert("Sucesso", "Produto excluído com sucesso!");
             } catch (error) {
@@ -135,7 +158,7 @@ export default function ProductManagement() {
       />
       <FlatList
         data={products}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item, index) => item.id.toString()}
         renderItem={({ item, index }) => (
           <View style={styles.productItem}>
             <View>
