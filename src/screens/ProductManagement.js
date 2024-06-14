@@ -171,9 +171,9 @@ export default function ProductManagement() {
               <Text>Quantidade: {item.quantity}</Text>
             </View>
             <View style={styles.buttonsContainer}>
-              <View style={{flexDirection: 'row',gap:20,}}>
-              <FontAwesome5 name="pen-fancy" onPress={() => editProduct(index)} size={24} color="#00aaff" />
-              <AntDesign name="delete" onPress={() => deleteProduct(index)} size={24} color="#dc3545" />
+              <View style={{ flexDirection: 'row', gap: 20, }}>
+                <FontAwesome5 name="pen-fancy" onPress={() => editProduct(index)} size={24} color="#00aaff" />
+                <AntDesign name="delete" onPress={() => deleteProduct(index)} size={24} color="#dc3545" />
               </View>
               <TextInput
                 style={styles.quantityInput}
